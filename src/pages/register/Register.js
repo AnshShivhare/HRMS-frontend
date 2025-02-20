@@ -21,7 +21,7 @@ const Register = () => {
   };
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" mt={5}>
+    <Box display="flex" flexDirection="column" alignItems="center" mt={5} width="300px" mx="auto">
       <Typography variant="h4">Register</Typography>
       <TextField label="Name" variant="outlined" fullWidth margin="normal" value={name} onChange={(e) => setName(e.target.value)} />
       <TextField label="Email" variant="outlined" fullWidth margin="normal" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -35,7 +35,12 @@ const Register = () => {
         </Select>
       </FormControl>
 
-      <Button variant="contained" color="primary" fullWidth onClick={handleRegister}>Register</Button>
+      <Button variant="contained" color="primary" fullWidth onClick={handleRegister} sx={{ mt: 2 }}>
+        Register
+      </Button>
+      <Button variant="outlined" color="secondary" fullWidth onClick={() => navigate("/login")} sx={{ mt: 2 }}>
+        Login
+      </Button>
     </Box>
   );
 };

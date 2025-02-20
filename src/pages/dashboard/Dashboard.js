@@ -6,10 +6,9 @@ import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../../config/service";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth(); // Added logout function from AuthContext
   const navigate = useNavigate();
   const [stats, setStats] = useState({ totalEmployees: 0, pendingLeaves: 0, monthlyPayroll: 0, attendance: [] });
-  const [salary, setSalary] = useState(0);
   const [checkedIn, setCheckedIn] = useState(false);
   const [checkedOut, setCheckedOut] = useState(false);
   const [checkInTime, setCheckInTime] = useState(null);
@@ -18,17 +17,9 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const employeesRes = await apiRequest("GET","getEmployeeCount");
-        // const leavesRes = await apiRequest("/api/leaves/pending");
-        // const payrollRes = await axios.get("/api/payroll/monthly");
-        // const attendanceRes = await axios.get(`/api/attendance/${user.id}`);
-        // const salaryRes = await axios.get(`/api/payroll/salary/${user.id}`);
-
+        const employeesRes = await apiRequest("GET", "getEmployeeCount");
         setStats({
           totalEmployees: employeesRes.result.totalEmployees,
-        //   pendingLeaves: leavesRes.data.count,
-        //   monthlyPayroll: payrollRes.data.total,
-        //   attendance: attendanceRes.data,
         });
       } catch (error) {
         console.error("Error fetching dashboard data", error);
@@ -45,6 +36,8 @@ const Dashboard = () => {
         setCheckedIn(true);
         setCheckInTime(time);
         alert("Checked in successfully at " + time);
+      }else{
+        alert(response.error)
       }
     }
   };
@@ -57,8 +50,15 @@ const Dashboard = () => {
         setCheckedOut(true);
         setCheckOutTime(time);
         alert("Checked out successfully at " + time);
+      }else{
+        alert(response.error)
       }
     }
+  };
+
+  const handleLogout = () => {
+    logout(); // Clear authentication
+    navigate("/login"); // Redirect to login page
   };
 
   return (
@@ -67,41 +67,42 @@ const Dashboard = () => {
         <List>
           {user.role === "HR" && (
             <>
-              <ListItem button onClick={() => navigate("/employee-management")}>
+              <ListItem style={{cursor:"pointer"}} button onClick={() => navigate("/employee-management")}>
                 <ListItemText primary="Manage Employees" />
               </ListItem>
-              <ListItem button onClick={() => navigate("/payroll")}>
+              <ListItem style={{cursor:"pointer"}} button onClick={() => navigate("/payroll")}>
                 <ListItemText primary="Payroll Processing" />
               </ListItem>
             </>
           )}
-          
-           <>
-  <ListItem button onClick={() => navigate("/leave-management")}>
-    <ListItemText primary="Leave Management" />
-  </ListItem>
-  
-  {user.role === "Employee" && (
-    <>
-      <ListItem button onClick={handleCheckIn} disabled={checkedIn}>
-        <ListItemText primary="Check In" />
-      </ListItem>
-      {checkInTime && (
-        <Typography variant="body2" sx={{ ml: 2, color: "green" }}>
-          Checked in at: {checkInTime}
-        </Typography>
-      )}
-      <ListItem button onClick={handleCheckOut} disabled={!checkedIn || checkedOut}>
-        <ListItemText primary="Check Out" />
-      </ListItem>
-      {checkOutTime && (
-        <Typography variant="body2" sx={{ ml: 2, color: "red" }}>
-          Checked out at: {checkOutTime}
-        </Typography>
-      )}
-    </>
-  )}
-    </>
+          <ListItem style={{cursor:"pointer"}} button onClick={() => navigate("/leave-management")}>
+            <ListItemText primary="Leave Management" />
+          </ListItem>
+
+          {user.role === "Employee" && (
+            <>
+              <ListItem style={{cursor:"pointer"}} button onClick={handleCheckIn} disabled={checkedIn}>
+                <ListItemText primary="Check In" />
+              </ListItem>
+              {checkInTime && (
+                <Typography variant="body2" sx={{ ml: 2, color: "green" }}>
+                  Checked in at: {checkInTime}
+                </Typography>
+              )}
+              <ListItem style={{cursor:"pointer"}} button onClick={handleCheckOut} disabled={!checkedIn || checkedOut}>
+                <ListItemText primary="Check Out" />
+              </ListItem>
+              {checkOutTime && (
+                <Typography variant="body2" sx={{ ml: 2, color: "red" }}>
+                  Checked out at: {checkOutTime}
+                </Typography>
+              )}
+            </>
+          )}
+          {/* Logout Button */}
+          <ListItem style={{cursor:"pointer",background:"red", color:"white"}} button onClick={handleLogout}>
+            <ListItemText primary="Logout" />
+          </ListItem>
         </List>
       </Drawer>
       <Box sx={{ flexGrow: 1, p: 3 }}>
@@ -110,54 +111,15 @@ const Dashboard = () => {
         </Typography>
         <Grid container spacing={3}>
           {user.role === "HR" && (
-            <>
-              <Grid item xs={12} md={4}>
-                <Card sx={{ backgroundColor: "#E3F2FD" }}>
-                  <CardContent>
-                    <Typography variant="h6">Total Employees</Typography>
-                    <Typography variant="h4">{stats.totalEmployees}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-             
-            </>
+            <Grid item xs={12} md={4}>
+              <Card sx={{ backgroundColor: "#E3F2FD" }}>
+                <CardContent>
+                  <Typography variant="h6">Total Employees</Typography>
+                  <Typography variant="h4">{stats.totalEmployees}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           )}
-          {user.role === "Employee" && (
-            <>
-              {/* <Grid item xs={12} md={6}>
-                <Card sx={{ backgroundColor: "#FFECB3" }}>
-                  <CardContent>
-                    <Typography variant="h6">Your Attendance</Typography>
-                    <Typography variant="h4">{stats.attendance.length} Days</Typography>
-                  </CardContent>
-                </Card>
-              </Grid> */}
-              {/* <Grid item xs={12} md={6}>
-                <Card sx={{ backgroundColor: "#D1C4E9" }}>
-                  <CardContent>
-                    <Typography variant="h6">Salary This Month</Typography>
-                    <Typography variant="h4">${salary}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid> */}
-            </>
-          )}
-          {/* <Grid item xs={12}>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                Weekly Attendance Overview
-              </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={stats.attendance}>
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="present" fill="#4CAF50" />
-                  <Bar dataKey="absent" fill="#F44336" />
-                </BarChart>
-              </ResponsiveContainer>
-            </Paper>
-          </Grid> */}
         </Grid>
       </Box>
     </Box>

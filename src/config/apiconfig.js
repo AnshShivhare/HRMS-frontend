@@ -1,4 +1,4 @@
-const url = "http://localhost:8000/api/v1"; //ansh
+const url = "https://hrms-backend-xs96.onrender.com/api/v1"; //ansh
 
 const ApiConfig = {
 login: `${url}/employee/login`,
